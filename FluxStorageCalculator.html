@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flux Storage Calculator - SF5</title>
+    <style>
+        :root {
+            --bg-color: #2c2f33; /* Dark background */
+            --text-color: #ffffff; /* Light text */
+            --primary-color: #7289da; /* Discord-like blue/purple */
+            --secondary-color: #99aab5; /* Lighter gray */
+            --container-bg: #23272a; /* Slightly darker container */
+            --input-bg: #40444b;
+            --input-border: #5c6066;
+            --button-hover: #677bc4;
+            --results-bg: #2a2e31;
+            --results-border: #7289da;
+            --note-color: #b9bbbe;
+            --border-dashed: #4f545c;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding-top: 20px;
+            padding-bottom: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: var(--container-bg);
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.25);
+            width: 90%;
+            max-width: 550px;
+            text-align: center;
+        }
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 25px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .input-group label {
+            font-weight: bold;
+            display: inline-block;
+            width: 180px;
+            margin-right: 10px;
+            color: var(--secondary-color);
+            vertical-align: middle;
+        }
+        .input-group input[type="number"] {
+            padding: 10px;
+            border: 1px solid var(--input-border);
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            border-radius: 4px;
+            width: 100px;
+            text-align: center;
+            font-size: 1em;
+            vertical-align: middle;
+        }
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            display: block;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: var(--button-hover);
+        }
+        #results {
+            margin-top: 30px;
+            text-align: left;
+            padding: 20px;
+            background-color: var(--results-bg);
+            border-left: 5px solid var(--results-border);
+            border-radius: 4px;
+        }
+        #results h2 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        #results h3 { /* Style for the new subheading */
+            margin-top: 15px;
+            margin-bottom: 5px;
+            color: var(--secondary-color);
+            font-size: 1.1em;
+        }
+        #materialList {
+            list-style-type: none;
+            padding: 0;
+        }
+        #materialList li {
+            padding: 10px 0;
+            border-bottom: 1px dashed var(--border-dashed);
+            color: var(--text-color);
+        }
+        #materialList li:last-child {
+            border-bottom: none;
+        }
+        .note {
+            font-size: 0.9em;
+            color: var(--note-color);
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Flux Storage Calculator - SF5</h1>
+
+        <div class="input-group">
+            <label for="numBasic">Basic Flux Storages:</label>
+            <input type="number" id="numBasic" value="0" min="0">
+        </div>
+        <div class="input-group">
+            <label for="numHerculean">Herculean Flux Storages:</label>
+            <input type="number" id="numHerculean" value="0" min="0">
+        </div>
+        <div class="input-group">
+            <label for="numGigantuan">Gigantuan Flux Storages:</label>
+            <input type="number" id="numGigantuan" value="1" min="0">
+        </div>
+
+        <button onclick="calculateTotalMaterials()">Show me the Grind</button>
+
+        <div id="results" style="display: none;">
+            <h2>Total Required Raw Materials:</h2>
+            <ul id="materialList"></ul>
+
+            <h3>Total Storage Units to Craft:</h3> 
+            <ul id="craftedUnitsList"></ul> 
+
+            <p class="note">Calculations based on the Sky Factory 5 3-tier progression: Basic -> Herculean -> Gigantuan. Each tier needs 6 of the previous + 3 glass panes.</p> 
+        </div>
+    </div>
+
+    <script>
+        // Materials needed for 1 "unit" of Basic Flux Storage requirements (i.e., the flux blocks part)
+        const redstoneDustPerBasicUnit = 126; // Cooked Redstone Dust - Flux Dust
+        const obsidianPerBasicUnit = 96;
+        const enderPearlsPerBasicUnit = 24;
+        const blazeRodsPerBasicUnit = 12; // Blaze Powder
+        const panesPerCraftStep = 3; // 3 Glass Panes for Tier Update
+
+        function calculateTotalMaterials() {
+            const numBasic = parseInt(document.getElementById('numBasic').value) || 0;
+            const numHerculean = parseInt(document.getElementById('numHerculean').value) || 0;
+            const numGigantuan = parseInt(document.getElementById('numGigantuan').value) || 0;
+
+            if (numBasic < 0 || numHerculean < 0 || numGigantuan < 0) {
+                alert("Please enter valid numbers (0 or more) for storages.");
+                document.getElementById('results').style.display = 'none';
+                return;
+            }
+            if (numBasic === 0 && numHerculean === 0 && numGigantuan === 0) {
+                document.getElementById('results').style.display = 'none';
+                return; 
+            }
+
+            // --- Calculate total number of "Basic Storage equivalents" for raw materials ---
+            let totalBasicEquivalents = 0;
+            totalBasicEquivalents += numGigantuan * 36;
+            totalBasicEquivalents += numHerculean * 6;
+            totalBasicEquivalents += numBasic * 1;
+
+            // --- Calculate total number of each tier of storage that will be CRAFTED ---
+            // These are the number of actual crafting operations for each storage tier.
+            let totalCraftedBasics = numBasic + (numHerculean * 6) + (numGigantuan * 36);
+            let totalCraftedHerculeans = numHerculean + (numGigantuan * 6);
+            let totalCraftedGigantuans = numGigantuan;
+            
+            // --- Calculate total Glass Panes needed based on total crafting operations ---
+            let totalActualPanes = (totalCraftedBasics + totalCraftedHerculeans + totalCraftedGigantuans) * panesPerCraftStep;
+            const totalGlassBlocks = Math.ceil((totalActualPanes / 16) * 6);
+
+            // --- Calculate total raw materials based on Basic Storage Equivalents ---
+            const totalCookedRedstoneDust = totalBasicEquivalents * redstoneDustPerBasicUnit;
+            const totalObsidian = totalBasicEquivalents * obsidianPerBasicUnit;
+            const totalEnderPearls = totalBasicEquivalents * enderPearlsPerBasicUnit;
+            const totalBlazeRods = totalBasicEquivalents * blazeRodsPerBasicUnit;
+
+            const totalRedstoneBlocks = Math.ceil(totalCookedRedstoneDust / 9);
+
+            // Display raw material results
+            const materialList = document.getElementById('materialList');
+            materialList.innerHTML = `
+                <li>Cooked Redstone Dust: ${totalCookedRedstoneDust.toLocaleString()} (from ~${totalRedstoneBlocks.toLocaleString()} Redstone Blocks, then smelted)</li>
+                <li>Obsidian Blocks: ${totalObsidian.toLocaleString()}</li>
+                <li>Ender Pearls: ${totalEnderPearls.toLocaleString()}</li>
+                <li>Blaze Rods: ${totalBlazeRods.toLocaleString()} (for ${ (totalBlazeRods * 2).toLocaleString() } Blaze Powder)</li>
+                <li>Glass Blocks: ${totalGlassBlocks.toLocaleString()} (for ${totalActualPanes.toLocaleString()} Glass Panes)</li>
+            `;
+
+            // Display total crafted units results
+            const craftedUnitsList = document.getElementById('craftedUnitsList');
+            craftedUnitsList.innerHTML = `
+                <li>Basic Flux Storages: ${totalCraftedBasics.toLocaleString()}</li>
+                <li>Herculean Flux Storages: ${totalCraftedHerculeans.toLocaleString()}</li>
+                <li>Gigantuan Flux Storages: ${totalCraftedGigantuans.toLocaleString()}</li>
+            `;
+
+            document.getElementById('results').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
