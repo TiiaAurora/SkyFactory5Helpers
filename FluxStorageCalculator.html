@@ -134,8 +134,8 @@
             <input type="number" id="numHerculean" value="0" min="0">
         </div>
         <div class="input-group">
-            <label for="numGigantuan">Gigantuan Flux Storages:</label>
-            <input type="number" id="numGigantuan" value="1" min="0">
+            <label for="numGargantuan">Gargantuan Flux Storages:</label>
+            <input type="number" id="numGargantuan" value="1" min="0">
         </div>
 
         <button onclick="calculateTotalMaterials()">Show me the Grind</button>
@@ -147,7 +147,7 @@
             <h3>Total Storage Units to Craft:</h3> 
             <ul id="craftedUnitsList"></ul> 
 
-            <p class="note">Calculations based on the Sky Factory 5 3-tier progression: Basic -> Herculean -> Gigantuan. Each tier needs 6 of the previous + 3 glass panes.</p> 
+            <p class="note">Calculations based on the Sky Factory 5 3-tier progression: Basic -> Herculean -> Gargantuan. Each tier needs 6 of the previous + 2 glass panes.</p> 
         </div>
     </div>
 
@@ -157,37 +157,37 @@
         const obsidianPerBasicUnit = 96;
         const enderPearlsPerBasicUnit = 24;
         const blazeRodsPerBasicUnit = 12; // Blaze Powder
-        const panesPerCraftStep = 3; // 3 Glass Panes for Tier Update
+        const panesPerCraftStep = 2; // 2 Glass Panes for Tier Update
 
         function calculateTotalMaterials() {
             const numBasic = parseInt(document.getElementById('numBasic').value) || 0;
             const numHerculean = parseInt(document.getElementById('numHerculean').value) || 0;
-            const numGigantuan = parseInt(document.getElementById('numGigantuan').value) || 0;
+            const numGargantuan = parseInt(document.getElementById('numGargantuan').value) || 0;
 
-            if (numBasic < 0 || numHerculean < 0 || numGigantuan < 0) {
+            if (numBasic < 0 || numHerculean < 0 || numGargantuan < 0) {
                 alert("Please enter valid numbers (0 or more) for storages.");
                 document.getElementById('results').style.display = 'none';
                 return;
             }
-            if (numBasic === 0 && numHerculean === 0 && numGigantuan === 0) {
+            if (numBasic === 0 && numHerculean === 0 && numGargantuan === 0) {
                 document.getElementById('results').style.display = 'none';
                 return; 
             }
 
             // --- Calculate total number of "Basic Storage equivalents" for raw materials ---
             let totalBasicEquivalents = 0;
-            totalBasicEquivalents += numGigantuan * 36;
+            totalBasicEquivalents += numGargantuan * 36;
             totalBasicEquivalents += numHerculean * 6;
             totalBasicEquivalents += numBasic * 1;
 
             // --- Calculate total number of each tier of storage that will be CRAFTED ---
             // These are the number of actual crafting operations for each storage tier.
-            let totalCraftedBasics = numBasic + (numHerculean * 6) + (numGigantuan * 36);
-            let totalCraftedHerculeans = numHerculean + (numGigantuan * 6);
-            let totalCraftedGigantuans = numGigantuan;
+            let totalCraftedBasics = numBasic + (numHerculean * 6) + (numGargantuan * 36);
+            let totalCraftedHerculeans = numHerculean + (numGargantuan * 6);
+            let totalCraftedGargantuans = numGargantuan;
             
             // --- Calculate total Glass Panes needed based on total crafting operations ---
-            let totalActualPanes = (totalCraftedBasics + totalCraftedHerculeans + totalCraftedGigantuans) * panesPerCraftStep;
+            let totalActualPanes = (totalCraftedBasics + totalCraftedHerculeans + totalCraftedGargantuans) * panesPerCraftStep;
             const totalGlassBlocks = Math.ceil((totalActualPanes / 16) * 6);
 
             // --- Calculate total raw materials based on Basic Storage Equivalents ---
@@ -213,7 +213,7 @@
             craftedUnitsList.innerHTML = `
                 <li>Basic Flux Storages: ${totalCraftedBasics.toLocaleString()}</li>
                 <li>Herculean Flux Storages: ${totalCraftedHerculeans.toLocaleString()}</li>
-                <li>Gigantuan Flux Storages: ${totalCraftedGigantuans.toLocaleString()}</li>
+                <li>Gargantuan Flux Storages: ${totalCraftedGargantuans.toLocaleString()}</li>
             `;
 
             document.getElementById('results').style.display = 'block';
